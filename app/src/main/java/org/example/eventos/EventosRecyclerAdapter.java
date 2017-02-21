@@ -1,5 +1,7 @@
 package org.example.eventos;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -24,12 +26,13 @@ import butterknife.ButterKnife;
 
 public class EventosRecyclerAdapter extends
         FirebaseRecyclerAdapter<EventoItem,
-                        EventosRecyclerAdapter.EventoViewHolder> {
+                EventosRecyclerAdapter.EventoViewHolder> {
     public EventosRecyclerAdapter(int modelLayout,
                                   DatabaseReference ref) {
         super(EventoItem.class, modelLayout,
                 EventosRecyclerAdapter.EventoViewHolder.class, ref);
     }
+
     @Override
     public EventoViewHolder onCreateViewHolder(ViewGroup parent,
                                                int viewType) {
@@ -38,6 +41,7 @@ public class EventosRecyclerAdapter extends
                         .inflate(mModelLayout, parent, false);
         return new EventoViewHolder(view);
     }
+
     @Override
     protected void populateViewHolder(EventoViewHolder holder,
                                       EventoItem item, int position) {
@@ -50,28 +54,44 @@ public class EventosRecyclerAdapter extends
         new DownloadImageTask((ImageView) holder.imagen)
                 .execute(item.getImagen());
     }
+
     class EventoViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
         @BindView(R.id.txtEvento)
         TextView txtEvento;
-        @BindView(R.id.txtCiudad) TextView txtCiudad;
-        @BindView(R.id.txtFecha) TextView txtFecha;
-        @BindView(R.id.imgImagen) ImageView imagen;
+        @BindView(R.id.txtCiudad)
+        TextView txtCiudad;
+        @BindView(R.id.txtFecha)
+        TextView txtFecha;
+        @BindView(R.id.imgImagen)
+        ImageView imagen;
+
         public EventoViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             ButterKnife.bind(this, itemView);
         }
+
         @Override
         public void onClick(View view) {
+            int position = getAdapterPosition();
+            EventoItem currentItem = (EventoItem) getItem(position);
+            Context context = EventosAplicacion.getAppContext();
+            Intent intent = new Intent(context, EventoDetalles.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("evento", currentItem.getId());
+            context.startActivity(intent);
         }
     }
+
     private class DownloadImageTask
             extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
+
         public DownloadImageTask(ImageView bmImage) {
             this.bmImage = bmImage;
         }
+
         protected Bitmap doInBackground(String... urls) {
             String urldisplay = urls[0];
             Bitmap mImagen = null;
@@ -83,6 +103,7 @@ public class EventosRecyclerAdapter extends
             }
             return mImagen;
         }
+
         protected void onPostExecute(Bitmap result) {
             bmImage.setImageBitmap(result);
         }

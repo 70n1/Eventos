@@ -6,6 +6,9 @@ import android.content.Intent;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import static org.example.eventos.EventosAplicacion.mostrarDialogo;
+
+
 /**
  * Created by AMARTIN on 20/02/2017.
  */
@@ -30,11 +33,5 @@ public class EventosFCMService extends FirebaseMessagingService {
         }
     }
 
-    static void mostrarDialogo(final Context context, final String mensaje) {
-        Intent intent = new Intent(context, Dialogo.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("mensaje", mensaje);
-        context.startActivity(intent);
-    }
 
 }

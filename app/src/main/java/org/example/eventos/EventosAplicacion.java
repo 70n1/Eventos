@@ -2,6 +2,7 @@ package org.example.eventos;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -159,5 +160,12 @@ public class EventosAplicacion extends Application {
                 guardarIdRegistroPreferencias(contexto, "");
             }
         }
+    }
+
+    static void mostrarDialogo(final Context context, final String mensaje) {
+        Intent intent = new Intent(context, Dialogo.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("mensaje", mensaje);
+        context.startActivity(intent);
     }
 }

@@ -22,7 +22,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static org.example.eventos.EventosAplicacion.PLAY_SERVICES_RESOLUTION_REQUEST;
-import static org.example.eventos.EventosFCMService.mostrarDialogo;
+import static org.example.eventos.EventosAplicacion.mostrarDialogo;
+
 
 public class ActividadPrincipal extends AppCompatActivity {
     private static ActividadPrincipal current;
@@ -105,6 +106,8 @@ public class ActividadPrincipal extends AppCompatActivity {
             extras = null;
         }
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
