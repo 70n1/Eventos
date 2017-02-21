@@ -17,14 +17,23 @@ public class EventosFCMService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         if (remoteMessage.getData().size() > 0) {
-            String evento = "";
-            evento = "Evento: " + remoteMessage.getData().get("evento") + "\n";
-            evento = evento + "Día: " + remoteMessage.getData().get("dia") + "\n";
-            evento = evento + "Ciudad: " +
-                    remoteMessage.getData().get("ciudad") + "\n";
-            evento = evento + "Comentario: "
-                    + remoteMessage.getData().get("comentario");
-            mostrarDialogo(getApplicationContext(), evento);
+            if (remoteMessage.getNotification().getClickAction().equals("OPEN_ACTIVITY_1") && remoteMessage.getData().containsKey("evento")) {
+                Context context = EventosAplicacion.getAppContext();
+                Intent intent = new Intent(context, EventoDetalles.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("evento", remoteMessage.getData().get("evento"));
+                context.startActivity(intent);
+            } else {
+                String evento = "";
+                evento = "No se han indicando los parámetros adecuados para abrir un evento.\nEvento: " + remoteMessage.getData().get("evento") + "\n";
+                evento = evento + "Día: " + remoteMessage.getData().get("dia") + "\n";
+                evento = evento + "Ciudad: " +
+                        remoteMessage.getData().get("ciudad") + "\n";
+                evento = evento + "Comentario: "
+                        + remoteMessage.getData().get("comentario");
+                mostrarDialogo(getApplicationContext(), evento);
+            }
+
         } else {
             if (remoteMessage.getNotification() != null) {
                 mostrarDialogo(getApplicationContext(),
