@@ -14,13 +14,13 @@ public class EventosFCMService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         if (remoteMessage.getData().size() > 0) {
-            String evento="";
-            evento ="Evento: "+remoteMessage.getData().get("evento")+ "\n";
-            evento = evento + "Día: "+ remoteMessage.getData().get("dia")+ "\n";
-            evento = evento +"Ciudad: "+
-                    remoteMessage.getData().get("ciudad")+"\n";
-            evento = evento +"Comentario: "
-                    +remoteMessage.getData().get("comentario");
+            String evento = "";
+            evento = "Evento: " + remoteMessage.getData().get("evento") + "\n";
+            evento = evento + "Día: " + remoteMessage.getData().get("dia") + "\n";
+            evento = evento + "Ciudad: " +
+                    remoteMessage.getData().get("ciudad") + "\n";
+            evento = evento + "Comentario: "
+                    + remoteMessage.getData().get("comentario");
             mostrarDialogo(getApplicationContext(), evento);
         } else {
             if (remoteMessage.getNotification() != null) {
@@ -29,10 +29,12 @@ public class EventosFCMService extends FirebaseMessagingService {
             }
         }
     }
-    static void mostrarDialogo (final Context context, final String mensaje){
+
+    static void mostrarDialogo(final Context context, final String mensaje) {
         Intent intent = new Intent(context, Dialogo.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("mensaje", mensaje);
         context.startActivity(intent);
     }
+
 }
