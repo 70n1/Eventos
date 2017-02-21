@@ -17,6 +17,7 @@ public class EventosFCMService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         if (remoteMessage.getData().size() > 0) {
+            //Práctica: Notificaciones ampliadas
             if (remoteMessage.getNotification().getClickAction().equals("OPEN_ACTIVITY_1") && remoteMessage.getData().containsKey("evento")) {
                 Context context = EventosAplicacion.getAppContext();
                 Intent intent = new Intent(context, EventoDetalles.class);
