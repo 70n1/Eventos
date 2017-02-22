@@ -114,6 +114,9 @@ public class EventoDetalles extends AppCompatActivity {
             case R.id.action_putFile:
                 seleccionarFotografiaDispositivo(vista, SOLICITUD_SELECCION_PUTFILE);
                 break;
+            case R.id.action_deleteFile:
+                borrarFicheroFirebaseStorage();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -151,6 +154,33 @@ public class EventoDetalles extends AppCompatActivity {
         Intent seleccionFotografiaIntent = new Intent(Intent.ACTION_PICK);
         seleccionFotografiaIntent.setType("image/*");
         startActivityForResult(seleccionFotografiaIntent, solicitud);
+    }
+
+    public void borrarFicheroFirebaseStorage() {
+        String fichero = evento;
+        StorageReference imagenRef = EventosAplicacion.getStorageReference().child(fichero);
+        try {
+            imagenRef.delete().addOnSuccessListener(new OnSuccessListener() {
+                @Override
+                public void onSuccess(Object o) {
+                    // Fichero borrado correctmente
+
+                    DatabaseReference myRef = EventosAplicacion.getItemsReference().child(evento);
+                    DatabaseReference imagenRef = myRef.child("imagen");
+                    imagenRef.setValue("");
+
+                    EventosAplicacion.mostrarDialogo(getApplicationContext(), "Imagen borrada correctamente.");
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) { //Error al subir el fichero
+                }
+            });
+
+        } catch (Exception e) {
+            EventosAplicacion.mostrarDialogo(getApplicationContext(), e.toString());
+        }
     }
 
     public void subirAFirebaseStorage(Integer opcion, String ficheroDispositivo) {
@@ -214,6 +244,7 @@ public class EventoDetalles extends AppCompatActivity {
             EventosAplicacion.mostrarDialogo(getApplicationContext(), e.toString());
         }
     }
+
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
