@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -25,12 +27,15 @@ public class EventosAplicacion extends Application {
     private static DatabaseReference eventosReference;
     private static Context context;
 
+    private FirebaseStorage storage;
+    private static StorageReference storageRef;
+
     //static final String URL_SERVIDOR = "http://cursoandroid.hol.es/notificaciones/";
 
     static final String URL_SERVIDOR = "http://www.tiramillas.es/notificaciones/";
 
-    static String ID_PROYECTO="eventos-ef246";
-    String idRegistro ="";
+    static String ID_PROYECTO = "eventos-ef246";
+    String idRegistro = "";
 
 
     @Override
@@ -40,25 +45,32 @@ public class EventosAplicacion extends Application {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         database.setPersistenceEnabled(true);
         eventosReference = database.getReference(ITEMS_CHILD_NAME);
+
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReferenceFromUrl("gs://eventos-ef246.appspot.com");
     }
+
     public static Context getAppContext() {
         return EventosAplicacion.context;
     }
+
     public static DatabaseReference getItemsReference() {
         return eventosReference;
     }
 
     public static class registrarDispositivoEnServidorWebTask
             extends AsyncTask<Void, Void, String> {
-        String response="error";
+        String response = "error";
         Context contexto;
-        String idRegistroTarea ="";
+        String idRegistroTarea = "";
+
         public void onPreExecute() {
             super.onPreExecute();
         }
+
         @Override
         protected String doInBackground(Void... arg0) {
-            try{
+            try {
                 Uri.Builder constructorParametros = new Uri.Builder()
                         .appendQueryParameter("iddevice", idRegistroTarea)
                         .appendQueryParameter("idapp", ID_PROYECTO);  //el idapp no es necesario para enviar a nuestro server, pero lo mantenemos para mantener la compatibilidad con el server del curso
@@ -76,22 +88,24 @@ public class EventosAplicacion extends Application {
                 outputStreamWriter.write(parametros.toString());
                 outputStreamWriter.flush();
                 int respuesta = conexion.getResponseCode();
-                if (respuesta==200){
-                    response="ok";
+                if (respuesta == 200) {
+                    response = "ok";
                 } else {
-                    response="error";
+                    response = "error";
                 }
             } catch (IOException e) {
-                response= "error";
+                response = "error";
             }
             return response;
         }
+
         public void onPostExecute(String res) {
             if (res == "ok") {
                 guardarIdRegistroPreferencias(contexto, idRegistroTarea);
             }
         }
     }
+
     public static void guardarIdRegistroPreferencias(Context context,
                                                      String idRegistro) {
         final SharedPreferences prefs = context.getSharedPreferences(
@@ -100,17 +114,19 @@ public class EventosAplicacion extends Application {
         editor.putString("idRegistro", idRegistro);
         editor.commit();
     }
+
     public static String dameIdRegistroPreferencias(Context context) {
         final SharedPreferences preferencias =
                 context.getSharedPreferences("Eventos", Context.MODE_PRIVATE);
         String idRegistro = preferencias.getString("idRegistro", "");
         return idRegistro;
     }
-    public static void guardarIdRegistro(Context context, String idRegistro){
+
+    public static void guardarIdRegistro(Context context, String idRegistro) {
         registrarDispositivoEnServidorWebTask tarea =
                 new registrarDispositivoEnServidorWebTask();
-        tarea.contexto=context;
-        tarea.idRegistroTarea=idRegistro;
+        tarea.contexto = context;
+        tarea.idRegistroTarea = idRegistro;
         tarea.execute();
     }
 
@@ -169,5 +185,9 @@ public class EventosAplicacion extends Application {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("mensaje", mensaje);
         context.startActivity(intent);
+    }
+
+    public static StorageReference getStorageReference() {
+        return storageRef;
     }
 }
