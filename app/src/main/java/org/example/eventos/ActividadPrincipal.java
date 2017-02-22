@@ -125,5 +125,10 @@ public class ActividadPrincipal extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void enviar_evento(MenuItem item) {
+        Intent intent = new Intent(getBaseContext(), NotificarEvento.class);
+        startActivity(intent);
+    }
 }
 

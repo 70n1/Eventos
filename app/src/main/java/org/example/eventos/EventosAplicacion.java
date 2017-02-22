@@ -25,8 +25,10 @@ public class EventosAplicacion extends Application {
     private static DatabaseReference eventosReference;
     private static Context context;
 
-    static final String URL_SERVIDOR =
-            "http://cursoandroid.hol.es/notificaciones/";
+    //static final String URL_SERVIDOR = "http://cursoandroid.hol.es/notificaciones/";
+
+    static final String URL_SERVIDOR = "http://www.tiramillas.es/notificaciones/";
+
     static String ID_PROYECTO="eventos-ef246";
     String idRegistro ="";
 
@@ -59,7 +61,7 @@ public class EventosAplicacion extends Application {
             try{
                 Uri.Builder constructorParametros = new Uri.Builder()
                         .appendQueryParameter("iddevice", idRegistroTarea)
-                        .appendQueryParameter("idapp", ID_PROYECTO);
+                        .appendQueryParameter("idapp", ID_PROYECTO);  //el idapp no es necesario para enviar a nuestro server, pero lo mantenemos para mantener la compatibilidad con el server del curso
                 String parametros =
                         constructorParametros.build().getEncodedQuery();
                 String url = URL_SERVIDOR + "registrar.php";
@@ -132,7 +134,7 @@ public class EventosAplicacion extends Application {
         @Override
         protected String doInBackground(Void... arg0) {
             try {
-                Uri.Builder constructorParametros = new Uri.Builder().appendQueryParameter("iddevice", idRegistroTarea).appendQueryParameter("idapp", ID_PROYECTO);
+                Uri.Builder constructorParametros = new Uri.Builder().appendQueryParameter("iddevice", idRegistroTarea).appendQueryParameter("idapp", ID_PROYECTO); //el idapp no es necesario para enviar a nuestro server, pero lo mantenemos
                 String parametros = constructorParametros.build().getEncodedQuery();
                 String url = URL_SERVIDOR + "desregistrar.php";
                 URL direccion = new URL(url);
