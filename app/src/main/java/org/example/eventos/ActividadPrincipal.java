@@ -65,9 +65,10 @@ public class ActividadPrincipal extends AppCompatActivity {
             FirebaseMessaging.getInstance().subscribeToTopic("Todos");
         }
 
-        ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.CAMERA, android.Manifest.permission.GET_ACCOUNTS}, 1);
+        /*ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.CAMERA}, 2);
-        ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.GET_ACCOUNTS}, 3);
+        ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.GET_ACCOUNTS}, 3);*/
     }
 
     private boolean comprobarGooglePlayServices() {
@@ -141,7 +142,8 @@ public class ActividadPrincipal extends AppCompatActivity {
         switch (requestCode) {
             case 1: {
                 if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Toast.makeText(ActividadPrincipal.this, "Permiso denegado para mantener escribir en el almacenamiento.", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(ActividadPrincipal.this, "Permiso denegado para mantener escribir en el almacenamiento.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActividadPrincipal.this, "Permiso denegado para mantener escribir en el almacenamiento, acceder a la cámara o acceder a las cuentas.", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
