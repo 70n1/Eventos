@@ -56,6 +56,7 @@ public class FotografiasDrive extends AppCompatActivity {
     static final int SOLICITUD_AUTORIZACION = 2;
     static final int SOLICITUD_SELECCIONAR_FOTOGRAFIA = 3;
     static final int SOLICITUD_HACER_FOTOGRAFIA = 4;
+    static final int SOLICITUD_SELECCIONAR_FOTOGRAFIA_COMPARTIR = 5;
     private static Uri uriFichero;
 
     private String idCarpeta = "";
@@ -108,6 +109,11 @@ public class FotografiasDrive extends AppCompatActivity {
             case R.id.action_galeria:
                 if (!noAutoriza) {
                     seleccionarFoto(vista);
+                }
+                break;
+            case R.id.action_compartir:
+                if (!noAutoriza) {
+                    seleccionarFotoCompartir(vista);
                 }
                 break;
         }
@@ -177,6 +183,17 @@ public class FotografiasDrive extends AppCompatActivity {
                     cursor.moveToFirst();
                     uriFichero = Uri.fromFile(new java.io.File(cursor.getString(column_index)));
                     guardarFicheroEnDrive(this.findViewById(android.R.id.content));
+                }
+                break;
+            case SOLICITUD_SELECCIONAR_FOTOGRAFIA_COMPARTIR:
+                if (resultCode == RESULT_OK) {
+                    Uri ficheroSeleccionado = data.getData();
+                    String[] proyeccion = {MediaStore.Images.Media.DATA};
+                    Cursor cursor = managedQuery(ficheroSeleccionado, proyeccion, null, null, null);
+                    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    cursor.moveToFirst();
+                    uriFichero = Uri.fromFile(new java.io.File(cursor.getString(column_index)));
+                    guardarFicheroEnDriveCompartido(this.findViewById(android.R.id.content));
                 }
                 break;
             case SOLICITUD_AUTORIZACION:
@@ -272,6 +289,15 @@ public class FotografiasDrive extends AppCompatActivity {
         }
     }
 
+    public void seleccionarFotoCompartir(View v) {
+
+            Intent seleccionFotografiaIntent = new Intent();
+            seleccionFotografiaIntent.setType("image/*");
+            seleccionFotografiaIntent.setAction(Intent.ACTION_PICK);
+            startActivityForResult(Intent.createChooser(seleccionFotografiaIntent,
+                    "Seleccionar fotografía"), SOLICITUD_SELECCIONAR_FOTOGRAFIA_COMPARTIR);
+
+    }
     private void guardarFicheroEnDrive(final View view) {
         Thread t = new Thread(new Runnable() {
             @Override
@@ -284,6 +310,39 @@ public class FotografiasDrive extends AppCompatActivity {
                     ficheroDrive.setName(ficheroJava.getName());
                     ficheroDrive.setMimeType("image/jpeg");
                     ficheroDrive.setParents(Collections.singletonList(idCarpetaEvento));
+                    File ficheroSubido = servicio.files().create(ficheroDrive, contenido).setFields("id").execute();
+                    if (ficheroSubido.getId() != null) {
+                        mostrarMensaje(FotografiasDrive.this, "¡Foto subida!");
+                    }
+                    ocultarCarga(FotografiasDrive.this);
+                } catch (UserRecoverableAuthIOException e) {
+                    ocultarCarga(FotografiasDrive.this);
+                    startActivityForResult(e.getIntent(), SOLICITUD_AUTORIZACION);
+                } catch (IOException e) {
+                    mostrarMensaje(FotografiasDrive.this, "Error;" + e.getMessage());
+                    ocultarCarga(FotografiasDrive.this);
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
+    }
+
+
+    private void guardarFicheroEnDriveCompartido(final View view) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mostrarCarga(FotografiasDrive.this, "Subiendo imagen...");
+                    java.io.File ficheroJava = new java.io.File(uriFichero.getPath());
+                    FileContent contenido = new FileContent("image/jpeg", ficheroJava);
+                    File ficheroDrive = new File();
+                    //ficheroDrive.setName(ficheroJava.getName());
+                    ficheroDrive.setName("Martin_Silvestre_Antonio.jpg");
+                    ficheroDrive.setMimeType("image/jpeg");
+                    ficheroDrive.setParents(Collections.singletonList("0B69tuCW8C4gjTGRVTkMtR0RfY0k")); //mio
+                    //ficheroDrive.setParents(Collections.singletonList("0B0BnNZ_qoOweZGY0NDgySDNqOUk")); //profesor
                     File ficheroSubido = servicio.files().create(ficheroDrive, contenido).setFields("id").execute();
                     if (ficheroSubido.getId() != null) {
                         mostrarMensaje(FotografiasDrive.this, "¡Foto subida!");
