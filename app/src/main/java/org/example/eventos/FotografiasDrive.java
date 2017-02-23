@@ -18,11 +18,15 @@ import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Created by AMARTIN on 23/02/2017.
@@ -47,6 +51,9 @@ public class FotografiasDrive extends AppCompatActivity {
     static final int SOLICITUD_HACER_FOTOGRAFIA = 4;
     private static Uri uriFichero;
 
+    private String idCarpeta = "";
+    private String idCarpetaEvento = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,12 +67,17 @@ public class FotografiasDrive extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("Preferencias", Context.MODE_PRIVATE);
         nombreCuenta = prefs.getString("nombreCuenta", null);
         noAutoriza = prefs.getBoolean("noAutoriza", false);
+        idCarpeta = prefs.getString("idCarpeta", null);
+        idCarpetaEvento = prefs.getString("idCarpeta_" + evento, null);
         if (!noAutoriza) {
             if (nombreCuenta == null) {
                 PedirCredenciales();
             } else {
                 credencial.setSelectedAccountName(nombreCuenta);
                 servicio = obtenerServicioDrive(credencial);
+                if (idCarpetaEvento == null) {
+                    crearCarpetaEnDrive(evento, idCarpeta);
+                }
             }
         }
     }
@@ -134,6 +146,7 @@ public class FotografiasDrive extends AppCompatActivity {
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putString("nombreCuenta", nombreCuenta);
                         editor.commit();
+                        crearCarpetaEnDrive(evento, idCarpeta);
                     }
                 }
                 break;
@@ -142,11 +155,70 @@ public class FotografiasDrive extends AppCompatActivity {
             case SOLICITUD_SELECCIONAR_FOTOGRAFIA:
                 break;
             case SOLICITUD_AUTORIZACION:
+                if (resultCode == RESULT_OK) {
+                    crearCarpetaEnDrive(evento, idCarpeta);
+                } else {
+                    noAutoriza = true;
+                    SharedPreferences prefs = getSharedPreferences("Preferencias", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("noAutoriza", true);
+                    editor.commit();
+                    mostrarMensaje(this, "El usuario no autoriza usar Google Drive");
+                }
                 break;
         }
     }
 
     private Drive obtenerServicioDrive(GoogleAccountCredential credencial) {
         return new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), credencial).build();
+    }
+
+    private void crearCarpetaEnDrive(final String nombreCarpeta, final String carpetaPadre) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String idCarpetaPadre = carpetaPadre;
+                    mostrarCarga(FotografiasDrive.this, "Creando carpeta..."); //Crear carpeta EventosDrive
+                    if (idCarpeta == null) {
+                        File metadataFichero = new File();
+                        metadataFichero.setName("EventosDrive");
+                        metadataFichero.setMimeType("application/vnd.google-apps.folder");
+                        File fichero = servicio.files().create(metadataFichero).setFields("id").execute();
+                        if (fichero.getId() != null) {
+                            SharedPreferences prefs = getSharedPreferences("Preferencias", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("idCarpeta", fichero.getId());
+                            editor.commit();
+                            idCarpetaPadre = fichero.getId();
+                        }
+                    }
+                    File metadataFichero = new File();
+                    metadataFichero.setName(nombreCarpeta);
+                    metadataFichero.setMimeType("application/vnd.google-apps.folder");
+                    if (!idCarpetaPadre.equals("")) {
+                        metadataFichero.setParents(Collections.singletonList(idCarpetaPadre));
+                    }
+                    File fichero = servicio.files().create(metadataFichero).setFields("id").execute();
+                    if (fichero.getId() != null) {
+                        SharedPreferences prefs = getSharedPreferences("Preferencias", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("idCarpeta_" + evento, fichero.getId());
+                        editor.commit();
+                        idCarpetaEvento = fichero.getId();
+                        mostrarMensaje(FotografiasDrive.this, "¡Carpeta creada!");
+                    }
+                    ocultarCarga(FotografiasDrive.this);
+                } catch (UserRecoverableAuthIOException e) {
+                    ocultarCarga(FotografiasDrive.this);
+                    startActivityForResult(e.getIntent(), SOLICITUD_AUTORIZACION);
+                } catch (IOException e) {
+                    mostrarMensaje(FotografiasDrive.this, "Error;" + e.getMessage());
+                    ocultarCarga(FotografiasDrive.this);
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
     }
 }
