@@ -347,8 +347,8 @@ public class FotografiasDrive extends AppCompatActivity {
                     java.io.File ficheroJava = new java.io.File(uriFichero.getPath());
                     FileContent contenido = new FileContent("image/jpeg", ficheroJava);
                     File ficheroDrive = new File();
-                    //ficheroDrive.setName(ficheroJava.getName());
-                    ficheroDrive.setName("Martin_Silvestre_Antonio.jpg");
+                    ficheroDrive.setName(ficheroJava.getName());
+                    //ficheroDrive.setName("Martin_Silvestre_Antonio.jpg");
                     ficheroDrive.setMimeType("image/jpeg");
                     ficheroDrive.setParents(Collections.singletonList("0B69tuCW8C4gjTGRVTkMtR0RfY0k")); //mio
                     //ficheroDrive.setParents(Collections.singletonList("0B0BnNZ_qoOweZGY0NDgySDNqOUk")); //profesor
