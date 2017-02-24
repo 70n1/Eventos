@@ -1,5 +1,6 @@
 package org.example.eventos;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +14,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -30,8 +32,10 @@ public class EventosWeb extends AppCompatActivity {
     /*private ProgressBar barraProgreso;*/
     ProgressDialog dialogo;
     String evento;
+    final InterfazComunicacion miInterfazJava = new InterfazComunicacion(this);
 
     @Override
+    @SuppressLint("JavascriptInterface")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle extras = getIntent().getExtras();
@@ -105,6 +109,7 @@ public class EventosWeb extends AppCompatActivity {
             }
         });
         ActivityCompat.requestPermissions(EventosWeb.this, new String[]{android.Manifest.permission.ACCESS_NETWORK_STATE}, 2);
+        navegador.addJavascriptInterface(miInterfazJava, "jsInterfazNativa");
     }
 
     @Override
@@ -141,6 +146,20 @@ public class EventosWeb extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+
+    public class InterfazComunicacion {
+        Context mContext;
+
+        InterfazComunicacion(Context c) {
+            mContext = c;
+        }
+
+        @JavascriptInterface
+        public void volver() {
+            finish();
+        }
     }
 
 }
