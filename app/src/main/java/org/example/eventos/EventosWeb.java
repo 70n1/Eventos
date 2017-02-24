@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -28,12 +29,19 @@ public class EventosWeb extends AppCompatActivity {
     WebView navegador;
     /*private ProgressBar barraProgreso;*/
     ProgressDialog dialogo;
+    String evento;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle extras = getIntent().getExtras();
+        evento = extras.getString("evento");
+
         setContentView(R.layout.eventos_web);
 
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
 
         navegador = (WebView) findViewById(R.id.webkit);
         navegador.getSettings().setJavaScriptEnabled(true);
@@ -71,6 +79,7 @@ public class EventosWeb extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 dialogo.dismiss();
+                navegador.loadUrl("javascript:muestraEvento(\""+evento+"\");");
             }
 
             @Override
