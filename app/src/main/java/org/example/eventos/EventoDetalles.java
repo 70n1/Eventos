@@ -98,6 +98,7 @@ public class EventoDetalles extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_detalles, menu);
+        if (!EventosAplicacion.acercaDe) { menu.removeItem(R.id.action_acercaDe); }
         return true;
     }
 
