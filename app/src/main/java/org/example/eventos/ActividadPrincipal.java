@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,8 +16,11 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -27,13 +31,16 @@ import static org.example.eventos.EventosAplicacion.PLAY_SERVICES_RESOLUTION_REQ
 import static org.example.eventos.EventosAplicacion.mostrarDialogo;
 
 
-public class ActividadPrincipal extends AppCompatActivity {
+public class ActividadPrincipal extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private static ActividadPrincipal current;
 
     @BindView(R.id.reciclerViewEventos)
     RecyclerView recyclerView;
     private DatabaseReference databaseReference;
     private FirebaseRecyclerAdapter adapter;
+
+    private GoogleApiClient mGoogleApiClient;
+    private static final int REQUEST_INVITE = 0;
 
 
     @Override
@@ -69,6 +76,8 @@ public class ActividadPrincipal extends AppCompatActivity {
         /*ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.CAMERA}, 2);
         ActivityCompat.requestPermissions(ActividadPrincipal.this, new String[]{android.Manifest.permission.GET_ACCOUNTS}, 3);*/
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this).addApi(AppInvite.API).enableAutoManage(this, this).build();
     }
 
     private boolean comprobarGooglePlayServices() {
@@ -129,6 +138,9 @@ public class ActividadPrincipal extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
+        if (id == R.id.action_invitar) {
+            invitar();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -158,6 +170,33 @@ public class ActividadPrincipal extends AppCompatActivity {
                     Toast.makeText(ActividadPrincipal.this, "Permiso denegado para acceder a las cuentas", Toast.LENGTH_SHORT).show();
                 }
                 return;
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Toast.makeText(this, "Error al enviar la invitación", Toast.LENGTH_LONG);
+    }
+
+    private void invitar() {
+        Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+                .setMessage(getString(R.string.invitation_message))
+                .setDeepLink(Uri.parse(getString(R.string.invitation_deep_link)))
+                .setCustomImage(Uri.parse(getString(R.string.invitation_custom_image)))
+                .setCallToActionText(getString(R.string.invitation_cta))
+                .build();
+        startActivityForResult(intent, REQUEST_INVITE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_INVITE) {
+            if (resultCode == RESULT_OK) {
+                String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
+            } else {
+                Toast.makeText(this, "Error al enviar la invitación", Toast.LENGTH_LONG);
             }
         }
     }
