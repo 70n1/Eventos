@@ -73,7 +73,10 @@ public class EventoDetalles extends AppCompatActivity {
         ButterKnife.bind(this);
         Bundle extras = getIntent().getExtras();
         evento = extras.getString("evento");
-        if (evento == null) evento = "";
+        if (evento == null) {
+            android.net.Uri url = getIntent().getData();
+            evento = url.getQueryParameter("evento");
+        }
         registro = EventosAplicacion.getItemsReference().child(evento);
         registro.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
